@@ -13,13 +13,19 @@ function setup() {
 
 function draw() {
     background(200);
-
     
     let names = table.getColumn("Name");
     let platforms = table.getColumn("Platform");
     let releaseYear = table.getColumn("Year_of_Release");
     let globalSales = table.getColumn("Global_Sales");
     let developer = table.getColumn("Developer");
+
+    let totalGlobalSales = 0;
+    for (let i = 0; i < globalSales.length; i++) {
+        // Note: the values are strings
+        totalGlobalSales += parseFloat(globalSales[i]);
+    }
+    print("Log: summed global sales are: " + totalGlobalSales);
 
     textSize(50);
     text("Global sales", width/2 - 130, 100)
