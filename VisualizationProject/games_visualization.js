@@ -15,7 +15,7 @@ function draw() {
     background(200);
 
     textSize(30);
-    text('Video games data', width / 4, height / 4 - 120, width / 4);
+    text('Global sales of video games', width / 4, height / 4 - 120, width / 4 + 50);
 
     Names = table.getColumn('Name');
     // const platforms = table.getColumn('Platform');
@@ -56,8 +56,8 @@ function draw() {
 
         const dis = dist(mouseX, mouseY, pointX, pointY);
         let pointSize = 3;
-        if (dis < 7) {
-            fill('red');
+        if (dis < 5) {
+            fill('black');
             pointSize = 12;
             noStroke();
             circle(pointX, pointY, pointSize);
@@ -68,12 +68,12 @@ function draw() {
             text(Names[i], diagramX, diagramY);
 
             fill('black');
-            rect(diagramX, diagramY + 15, 30, 5);
-            fill('blue');
+            rect(diagramX, diagramY + 18, 30, 5);
+            fill('green');
             textSize(20);
             text(developer[i], diagramX, diagramY + 50);
 
-            subText(global_sales[i], user_score[i], user_count[i]);
+            subText(Names[i], global_sales[i], user_score[i], user_count[i]);
         } else {
             fill('blue');
             pointSize = 4;
@@ -86,21 +86,25 @@ function draw() {
     }
 }
 
-function mouseClicked() {
+function mouseClicked(event) {
     for (let i = 0; i < Points.length; i += 1) {
         const [pointX, pointY] = Points[i];
         const dis = dist(mouseX, mouseY, pointX, pointY);
         if (dis < 7) {
-            print("Clicked", Names[i])
+            print(`Clicked ${Names[i]}`, event);
+            textSize(16);
+            textAlign(LEFT);
+            fill('black');
+            text(`${Names[i]}`, width / 4, height / 4 + 50);
         }
     }
 }
 
-function subText(global_sale, user_score, user_count) {
+function subText(name, global_sale, user_score, user_count) {
     textSize(16);
     textAlign(LEFT);
     fill('black');
     if (global_sale !== undefined && user_count !== "") { // ?????
-        text(`The game has ${global_sale} million global sales with a score of ${user_score} from ${user_count} users.`, width / 4, height / 4, width / 4);
+        text(`${name} has ${global_sale} million global sales with a rating of ${user_score} from ${user_count} users.`, width / 4, height / 4, width / 4);
     }
 }
