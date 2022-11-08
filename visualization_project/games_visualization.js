@@ -9,6 +9,7 @@ function preload() {
 function setup() {
     createCanvas(windowWidth, windowHeight);
     rectMode(CENTER);
+    angleMode(DEGREES);
 }
 
 function draw() {
@@ -44,14 +45,28 @@ function draw() {
     Points = [];
     for (let i = 0; i < rows; i += 1) {
         lengthSize[i] = map(sales[i], minValue, maxValue, 0, 205);
-        const pointX = (lengthSize[i] + radius) * cos(radians(angle * i)) + diagramX;
-        const pointY = (lengthSize[i] + radius) * sin(radians(angle * i)) + diagramY;
+        const pointX = (lengthSize[i] + radius) * cos(angle * i) + diagramX;
+        const pointY = (lengthSize[i] + radius) * sin(angle * i) + diagramY;
         Points.push([pointX, pointY]);
-        const cirx = radius * cos(radians(angle * i)) + diagramX;
-        const ciry = radius * sin(radians(angle * i)) + diagramY;
+        const cirx = radius * cos(angle * i) + diagramX;
+        const ciry = radius * sin(angle * i) + diagramY;
+
+        // year divider
+        if (i % 10 == 0) {
+            push();
+            translate(pointX, pointY); // where the years are going to be
+            rotate(angle * i + 90);
+            textAlign(CENTER);
+            textSize(12);
+            text("'22", 0, -5); // offset
+            pop();
+
+            strokeWeight(1.5);
+        } else {
+            strokeWeight(0.5);
+        }
 
         stroke('black');
-        strokeWeight(0.5);
         line(cirx, ciry, pointX, pointY);
 
         const dis = dist(mouseX, mouseY, pointX, pointY);
@@ -104,7 +119,7 @@ function subText(name, global_sale, user_score, user_count) {
     textSize(16);
     textAlign(LEFT);
     fill('black');
-    if (global_sale !== undefined && user_count !== "") { // ?????
+    if (global_sale !== undefined && user_count !== '') { // ?????
         text(`${name} has ${global_sale} million global sales with a rating of ${user_score} from ${user_count} users.`, width / 4, height / 4, width / 4);
     }
 }
