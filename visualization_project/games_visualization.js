@@ -1,6 +1,8 @@
 // Global variables
 let Points;
-let Names;
+let Titles;
+let Entities;
+let games_data;
 
 function preload() {
     table = loadTable('data/video_games.csv', 'csv', 'header');
@@ -18,18 +20,32 @@ function draw() {
     textSize(30);
     text('Global sales of video games', width / 4, height / 4 - 120, width / 4 + 50);
 
-    Names = table.getColumn('Name');
-    // const platforms = table.getColumn('Platform');
-    // const releaseYear = table.getColumn('Year_of_Release');
-    const global_sales = table.getColumn('Global_Sales');
-    const developer = table.getColumn('Developer');
-    const na_sales = table.getColumn('NA_Sales');
-    // const euSales = table.getColumn('EU_Sales');
-    // const jpSales = table.getColumn('JP_Sales');
-    const user_count = table.getColumn('User_Count');
-    const user_score = table.getColumn('User_Score');
+    games_data = {};
 
-    const rows = 150;
+    Titles = table.getColumn('Name');
+    const platforms = table.getColumn('Platform');
+    const release_year = table.getColumn('Year_of_Release');
+    const global_sales = table.getColumn('Global_Sales');
+    const developers = table.getColumn('Developer');
+    const user_counts = table.getColumn('User_Count');
+    const user_scores = table.getColumn('User_Score');
+
+    for (let i = 0; i < Titles.length; i++) {
+        if (user_scores[i] === '' || user_counts[i] === '') {
+            continue;
+        } else {
+            // sort dict by the release year
+            games_data[Titles[i]] = [ 
+                platforms[i], developers[i], release_year[i], global_sales[i], user_scores[i], user_counts[i]
+            ];
+        }
+    }
+
+    // placeholder
+    const na_sales = table.getColumn('NA_Sales');
+
+    // how much data we display
+    const rows = 100;
 
     const sales = na_sales.slice(0, rows);
     const diagramX = (width / 4) * 3 - 90;
@@ -80,15 +96,15 @@ function draw() {
             textAlign(CENTER);
             textSize(25);
             fill('black');
-            text(Names[i], diagramX, diagramY);
+            text(Titles[i], diagramX, diagramY);
 
             fill('black');
             rect(diagramX, diagramY + 18, 30, 5);
             fill('green');
             textSize(20);
-            text(developer[i], diagramX, diagramY + 50);
+            text(developers[i], diagramX, diagramY + 50);
 
-            subText(Names[i], global_sales[i], user_score[i], user_count[i]);
+            subText(Titles[i], global_sales[i], user_scores[i], user_counts[i]);
         } else {
             fill('blue');
             pointSize = 4;
@@ -106,20 +122,22 @@ function mouseClicked(event) {
         const [pointX, pointY] = Points[i];
         const dis = dist(mouseX, mouseY, pointX, pointY);
         if (dis < 7) {
-            print(`Clicked ${Names[i]}`, event);
+            print(`Clicked ${Titles[i]}`, event);
             textSize(16);
             textAlign(LEFT);
             fill('black');
-            text(`${Names[i]}`, width / 4, height / 4 + 50);
+            text(`${Titles[i]}`, width / 4, height / 4 + 50);
         }
     }
+    // print(Entities);
 }
 
-function subText(name, global_sale, user_score, user_count) {
+function subText(name, global_sale, user_scores, user_counts) {
     textSize(16);
     textAlign(LEFT);
     fill('black');
-    if (global_sale !== undefined && user_count !== '') { // ?????
-        text(`${name} has ${global_sale} million global sales with a rating of ${user_score} from ${user_count} users.`, width / 4, height / 4, width / 4);
+    // this wont be needed as i will bad data
+    if (global_sale !== undefined && user_counts !== '') { // ?????
+        text(`${name} has ${global_sale} million global sales with a rating of ${user_scores} from ${user_counts} users.`, width / 4, height / 4, width / 4);
     }
 }
