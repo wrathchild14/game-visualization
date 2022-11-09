@@ -36,9 +36,9 @@ function draw() {
         textSize(30);
         text(
             "Sales of video games through the years",
-            width / 4,
+            width / 4 + 50,
             height / 4 - 120,
-            width / 3 + 150
+            width / 3 + 250
         );
 
         textSize(15);
