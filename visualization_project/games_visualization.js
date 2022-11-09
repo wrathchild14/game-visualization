@@ -1,7 +1,8 @@
-// Global variables
-// Points = tracking of the points on screen, Games_data = data handling
-let Points = [], Games_data = [];
-let multiplier_diagram_x = 3/4, multiplier_diagram_y = 1/2, multiplier_r = 1/7;
+// _g = Global variables
+// points_g = tracking of the points on screen, games_data_g = data handling
+let points_g = [], games_data_g = [];
+let multiplier_diagram_x_g = 1 / 4, multiplier_diagram_y_g = 1 / 2, multiplier_r_g = 0; // inital multiplier values
+let zoomed_state_g = false;
 
 function preload() {
     table = loadTable('data/video_games.csv', 'csv', 'header');
@@ -21,29 +22,34 @@ function draw() {
     textSize(30);
     text('Global sales of video games', width / 4, height / 4 - 120, width / 4 + 50);
 
+    // lerp-animation of zooming in/out
+    if (zoomed_state_g) {
+        multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 1 / 2, 0.1);
+        multiplier_r_g = lerp(multiplier_r_g, 1 / 4, 0.075);
+    } else {
+        multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 3 / 4, 0.1);
+        multiplier_r_g = lerp(multiplier_r_g, 1 / 7, 0.075);
+    }
+
     // how much data we display
     const rows = 150;
 
-    diagramX = multiplier_diagram_x * width;
-    diagramY = multiplier_diagram_y * height;
-    radius = multiplier_r * width;
-    // const diagramX = (width / 4) * 3 - 90;
-    // const diagramX = (width / 2);
-    // const diagramY = height / 2;
-    // let radius = width / 5 - 100;
-    // const radius = width / 5 - 150;
-    // const radius = width / 3 - 150;
+    // works with our global variables
+    diagramX = multiplier_diagram_x_g * width;
+    diagramY = multiplier_diagram_y_g * height;
+    radius = multiplier_r_g * width;
+
     const angle = 360 / rows;
 
     const minValue = -5.09;
     const maxValue = 82.53;
 
-    const lengthSize = [];
+    const line_size = [];
     for (let i = 0; i < rows; i += 1) {
-        lengthSize[i] = map(Games_data[i].global_sale, minValue, maxValue, 0, 205);
-        const pointX = (lengthSize[i] + radius) * cos(angle * i) + diagramX;
-        const pointY = (lengthSize[i] + radius) * sin(angle * i) + diagramY;
-        Points.push([pointX, pointY]);
+        line_size[i] = map(games_data_g[i].global_sale, minValue, maxValue, 0, 205);
+        const pointX = (line_size[i] + radius) * cos(angle * i) + diagramX;
+        const pointY = (line_size[i] + radius) * sin(angle * i) + diagramY;
+        points_g.push([pointX, pointY]);
         const cirx = radius * cos(angle * i) + diagramX;
         const ciry = radius * sin(angle * i) + diagramY;
 
@@ -54,7 +60,7 @@ function draw() {
             rotate(angle * i + 90);
             textAlign(CENTER);
             textSize(16);
-            text(Games_data[i].release_years.slice(-2) + "'", 0, -5); // offset
+            text(games_data_g[i].release_years.slice(-2) + "'", 0, -5); // offset
             pop();
 
             strokeWeight(1.5);
@@ -76,15 +82,15 @@ function draw() {
             textAlign(CENTER);
             textSize(25);
             fill('black');
-            text(Games_data[i].title, diagramX, diagramY);
+            text(games_data_g[i].title, diagramX, diagramY);
 
             fill('black');
             rect(diagramX, diagramY + 18, 30, 5);
             fill('green');
             textSize(20);
-            text(Games_data[i].developer, diagramX, diagramY + 50);
+            text(games_data_g[i].developer, diagramX, diagramY + 50);
 
-            subText(Games_data[i].title, Games_data[i].global_sale, Games_data[i].user_score, Games_data[i].user_count);
+            subText(games_data_g[i].title, games_data_g[i].global_sale, games_data_g[i].user_score, games_data_g[i].user_count);
         } else {
             fill('blue');
             pointSize = 4;
@@ -95,18 +101,26 @@ function draw() {
             subText();
         }
     }
+
+    const dis = dist(mouseX, mouseY, diagramX, diagramY);
+    if (dis > radius + 250 && zoomed_state_g) {
+        zoomed_state_g = false;
+    }
 }
 
 function mouseClicked(event) {
-    for (let i = 0; i < Points.length; i += 1) {
-        const [pointX, pointY] = Points[i];
+    // this is heavy
+    for (let i = 0; i < points_g.length; i += 1) {
+        const [pointX, pointY] = points_g[i];
         const dis = dist(mouseX, mouseY, pointX, pointY);
         if (dis < 7) {
-            print(`Clicked ${Games_data[i].title}`, event);
+            zoomed_state_g = true;
+
+            // print(`Clicked ${games_data_g[i].title}`, event);
             textSize(16);
             textAlign(LEFT);
             fill('black');
-            text(`${Games_data[i].title}`, width / 4, height / 4 + 50);
+            // text(`${games_data_g[i].title}`, width / 4, height / 4 + 50);
         }
     }
 }
@@ -115,7 +129,7 @@ function subText(name, global_sale, user_scores, user_counts) {
     textSize(16);
     textAlign(LEFT);
     fill('black');
-    if (global_sale !== undefined && user_counts !== '') { // ?????
+    if (global_sale !== undefined && user_counts !== '') { // ????? i guess this should stay here because it doesnt even display text
         text(`${name} has ${global_sale} million global sales with a rating of ${user_scores} from ${user_counts} users.`, width / 4, height / 4, width / 4);
     }
 }
@@ -142,13 +156,13 @@ function setupData(global_sales_minimum) {
             game_object.user_score = user_scores[i];
             game_object.user_count = user_counts[i];
 
-            Games_data.push(game_object);
+            games_data_g.push(game_object);
         }
     }
 
-    Games_data.sort(function (a, b) {
+    games_data_g.sort(function (a, b) {
         return a.release_years - b.release_years;
     });
 
-    Games_data = Games_data.reverse();
+    games_data_g = games_data_g.reverse();
 }
