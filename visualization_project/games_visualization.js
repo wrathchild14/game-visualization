@@ -3,6 +3,7 @@
 let points_g = [], games_data_g = [];
 let multiplier_diagram_x_g = 1 / 4, multiplier_diagram_y_g = 1 / 2, multiplier_r_g = 0; // inital multiplier values
 let zoomed_state_g = false;
+let focused_game_g = 0;
 
 function preload() {
     table = loadTable('data/video_games.csv', 'csv', 'header');
@@ -18,21 +19,28 @@ function setup() {
 
 function draw() {
     background(200);
+    
+    // freeing
+    points_g = [];
 
-    textSize(30);
-    text('Global sales of video games', width / 4, height / 4 - 120, width / 4 + 50);
+    if (!zoomed_state_g) { 
+        multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 2.8 / 4, 0.1);
+        multiplier_r_g = lerp(multiplier_r_g, 1 / 7, 0.075);
 
-    // lerp-animation of zooming in/out
-    if (zoomed_state_g) {
+        textSize(30);
+        text('Global sales of video games through the years', width / 4, height / 4 - 120, width /3  + 150);
+
+        textSize(15);
+        text('Hover/click the points...', width / 4, height / 4 - 80, width /3  + 145);
+    } else {
         multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 1 / 2, 0.1);
         multiplier_r_g = lerp(multiplier_r_g, 1 / 4, 0.075);
-    } else {
-        multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 3 / 4, 0.1);
-        multiplier_r_g = lerp(multiplier_r_g, 1 / 7, 0.075);
+
+        show_focused_text();
     }
 
     // how much data we display
-    const rows = 150;
+    const rows = 120;
 
     // works with our global variables
     diagramX = multiplier_diagram_x_g * width;
@@ -71,39 +79,12 @@ function draw() {
         stroke('black');
         line(cirx, ciry, pointX, pointY);
 
-        const dis = dist(mouseX, mouseY, pointX, pointY);
-        let pointSize = 3;
-        if (dis < 5) {
-            fill('black');
-            pointSize = 12;
-            noStroke();
-            circle(pointX, pointY, pointSize);
-
-            textAlign(CENTER);
-            textSize(25);
-            fill('black');
-            text(games_data_g[i].title, diagramX, diagramY);
-
-            fill('black');
-            rect(diagramX, diagramY + 18, 30, 5);
-            fill('green');
-            textSize(20);
-            text(games_data_g[i].developer, diagramX, diagramY + 50);
-
-            subText(games_data_g[i].title, games_data_g[i].global_sale, games_data_g[i].user_score, games_data_g[i].user_count);
-        } else {
-            fill('blue');
-            pointSize = 4;
-
-            noStroke();
-            circle(pointX, pointY, pointSize);
-
-            subText();
-        }
+        handle_points(pointX, pointY, diagramX, diagramY, i);
     }
-
-    const dis = dist(mouseX, mouseY, diagramX, diagramY);
-    if (dis > radius + 250 && zoomed_state_g) {
+    
+    // handle zooming out
+    const mouse_pos_circle = dist(mouseX, mouseY, diagramX, diagramY);
+    if (mouse_pos_circle > radius + 250 && zoomed_state_g) {
         zoomed_state_g = false;
     }
 }
@@ -115,11 +96,9 @@ function mouseClicked(event) {
         const dis = dist(mouseX, mouseY, pointX, pointY);
         if (dis < 7) {
             zoomed_state_g = true;
-
+            focused_game_g = i;
             // print(`Clicked ${games_data_g[i].title}`, event);
-            textSize(16);
-            textAlign(LEFT);
-            fill('black');
+            
             // text(`${games_data_g[i].title}`, width / 4, height / 4 + 50);
         }
     }
@@ -130,7 +109,49 @@ function subText(name, global_sale, user_scores, user_counts) {
     textAlign(LEFT);
     fill('black');
     if (global_sale !== undefined && user_counts !== '') { // ????? i guess this should stay here because it doesnt even display text
-        text(`${name} has ${global_sale} million global sales with a rating of ${user_scores} from ${user_counts} users.`, width / 4, height / 4, width / 4);
+        text(`${name} has ${global_sale} million global sales with a rating of ${user_scores} from ${user_counts} users.`, width / 4, height / 4, width / 3 + 140);
+    }
+}
+
+function show_focused_text() {
+    textSize(16);
+    textAlign(CENTER);
+    fill('black');
+    text(games_data_g[focused_game_g].title, width/2, height/2, width/3)
+}
+
+// showing of points, showing of bigger point and sub text when hovering
+function handle_points( pointX, pointY, diagramX, diagramY, focused_point) {
+    const i = focused_point;
+    const dis = dist(mouseX, mouseY, pointX, pointY);
+    let pointSize = 3;
+    if (dis < 5 && !zoomed_state_g) {
+        fill('black');
+        pointSize = 12;
+        noStroke();
+        circle(pointX, pointY, pointSize);
+
+        textAlign(CENTER);
+        textSize(25);
+        fill('black');
+        text(games_data_g[i].title, diagramX, diagramY);
+
+        fill('black');
+        rect(diagramX, diagramY + 18, 30, 5);
+        fill('green');
+        textSize(20);
+        text(games_data_g[i].developer, diagramX, diagramY + 50);
+
+        if (!zoomed_state_g) {
+            subText(games_data_g[i].title, games_data_g[i].global_sale, games_data_g[i].user_score, games_data_g[i].user_count);
+        }
+    } else {
+        fill('blue');
+        pointSize = 4;
+
+        noStroke();
+        circle(pointX, pointY, pointSize);
+        subText();
     }
 }
 
