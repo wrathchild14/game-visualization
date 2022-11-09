@@ -1,6 +1,7 @@
 // Global variables
 // Points = tracking of the points on screen, Games_data = data handling
 let Points = [], Games_data = [];
+let multiplier_diagram_x = 3/4, multiplier_diagram_y = 1/2, multiplier_r = 1/7;
 
 function preload() {
     table = loadTable('data/video_games.csv', 'csv', 'header');
@@ -23,11 +24,14 @@ function draw() {
     // how much data we display
     const rows = 150;
 
-    const diagramX = (width / 4) * 3 - 90;
+    diagramX = multiplier_diagram_x * width;
+    diagramY = multiplier_diagram_y * height;
+    radius = multiplier_r * width;
+    // const diagramX = (width / 4) * 3 - 90;
     // const diagramX = (width / 2);
-    const diagramY = height / 2;
+    // const diagramY = height / 2;
     // let radius = width / 5 - 100;
-    const radius = width / 5 - 150;
+    // const radius = width / 5 - 150;
     // const radius = width / 3 - 150;
     const angle = 360 / rows;
 
