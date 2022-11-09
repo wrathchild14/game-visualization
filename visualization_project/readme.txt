@@ -1,3 +1,6 @@
+Notes
+    Running the index.html file doesn't work, the project must be run in some different way...
+
 Setting up
     The main program is games_visualization.js and it uses JavaScript and the p5.js library https://p5js.org/
     For running I used the Live Server from Visual Studio Code extensions, but every live server approach works (tested python -m http.server also works)

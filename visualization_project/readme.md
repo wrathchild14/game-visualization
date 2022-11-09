@@ -1,3 +1,7 @@
+## Notes
+
+Running the `index.html` file doesn't work, the project must be run in some different way...
+
 ## Setting up
 
 - The main program is `games_visualization.js` and it uses `JavaScript` and the `p5.js` library https://p5js.org/
