@@ -2,8 +2,7 @@
 // points_g = tracking of the points on screen, games_data_g = data handling
 let points_g = [], games_data_g = [];
 let multiplier_diagram_x_g = 1 / 4, multiplier_diagram_y_g = 1 / 2, multiplier_r_g = 0; // inital multiplier values
-let zoomed_state_g = false;
-let focused_game_g = 0;
+let focused_game_g = 0, fade_g = 0, zoomed_state_g = false;
 
 function preload() {
     table = loadTable('data/video_games.csv', 'csv', 'header');
@@ -19,24 +18,27 @@ function setup() {
 
 function draw() {
     background(200);
-    
+
     // freeing
     points_g = [];
 
-    if (!zoomed_state_g) { 
+    if (!zoomed_state_g) {
         multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 2.8 / 4, 0.1);
         multiplier_r_g = lerp(multiplier_r_g, 1 / 7, 0.075);
 
+        textAlign(LEFT);
+        fill('black');
         textSize(30);
-        text('Global sales of video games through the years', width / 4, height / 4 - 120, width /3  + 150);
+        text('Sales of video games through the years', width / 4, height / 4 - 120, width / 3 + 150);
 
         textSize(15);
-        text('Hover/click the points...', width / 4, height / 4 - 80, width /3  + 145);
+        text('Hover/click the points...', width / 4, height / 4 - 80, width / 3 + 145);
     } else {
         multiplier_diagram_x_g = lerp(multiplier_diagram_x_g, 1 / 2, 0.1);
-        multiplier_r_g = lerp(multiplier_r_g, 1 / 4, 0.075);
+        multiplier_r_g = lerp(multiplier_r_g, 1 / 5, 0.075);
 
-        show_focused_text();
+        fade_g = lerp(fade_g, 255, 0.01);
+        show_focused_text(fade_g);
     }
 
     // how much data we display
@@ -66,40 +68,39 @@ function draw() {
             push();
             translate(pointX, pointY); // where the years are going to be
             rotate(angle * i + 90);
+            fill('black');
             textAlign(CENTER);
             textSize(16);
-            text(games_data_g[i].release_years.slice(-2) + "'", 0, -5); // offset
+            text(games_data_g[i].release_year.slice(-2) + "'", 0, -5); // offset
             pop();
 
-            strokeWeight(1.5);
+            strokeWeight(1.2);
         } else {
             strokeWeight(0.5);
         }
 
+        // drawing line
         stroke('black');
         line(cirx, ciry, pointX, pointY);
 
-        handle_points(pointX, pointY, diagramX, diagramY, i);
+        handle_drawing_point(pointX, pointY, diagramX, diagramY, i);
     }
-    
+
     // handle zooming out
     const mouse_pos_circle = dist(mouseX, mouseY, diagramX, diagramY);
-    if (mouse_pos_circle > radius + 250 && zoomed_state_g) {
+    if (mouse_pos_circle > radius + 300 && zoomed_state_g) {
         zoomed_state_g = false;
     }
 }
 
 function mouseClicked(event) {
-    // this is heavy
     for (let i = 0; i < points_g.length; i += 1) {
         const [pointX, pointY] = points_g[i];
         const dis = dist(mouseX, mouseY, pointX, pointY);
         if (dis < 7) {
+            fade_g = 0;
             zoomed_state_g = true;
             focused_game_g = i;
-            // print(`Clicked ${games_data_g[i].title}`, event);
-            
-            // text(`${games_data_g[i].title}`, width / 4, height / 4 + 50);
         }
     }
 }
@@ -113,45 +114,55 @@ function subText(name, global_sale, user_scores, user_counts) {
     }
 }
 
-function show_focused_text() {
-    textSize(16);
+function show_focused_text(fade_g) {
+    const game = games_data_g[focused_game_g];
+
+    textSize(24);
     textAlign(CENTER);
-    fill('black');
-    text(games_data_g[focused_game_g].title, width/2, height/2, width/3)
+    fill(0, 0, 0, fade_g);
+    text("Title", width / 2, height / 3, width / 3)
+    rect(width / 2, height / 3 + 24, 40, 2);
+
+    fill(1, 73, 1, fade_g)
+    text(game.title, width / 2, height / 3 + 30, width / 3)
+
+    fill(66, 71, 68, fade_g)
+    textSize(16)
+    text(`${game.title} was created by ${game.developer} in ${game.release_year} on the platform ${game.platform}. It had a total of ${game.global_sale} million sales with a user rating of ${game.user_score} from ${game.user_count} users.`,
+        width / 2, height / 3 + 150, width / 3 + 100)
 }
 
 // showing of points, showing of bigger point and sub text when hovering
-function handle_points( pointX, pointY, diagramX, diagramY, focused_point) {
+function handle_drawing_point(pointX, pointY, diagramX, diagramY, focused_point) {
     const i = focused_point;
     const dis = dist(mouseX, mouseY, pointX, pointY);
     let pointSize = 3;
-    if (dis < 5 && !zoomed_state_g) {
+    if (dis < 5) {
         fill('black');
         pointSize = 12;
         noStroke();
         circle(pointX, pointY, pointSize);
 
-        textAlign(CENTER);
-        textSize(25);
-        fill('black');
-        text(games_data_g[i].title, diagramX, diagramY);
-
-        fill('black');
-        rect(diagramX, diagramY + 18, 30, 5);
-        fill('green');
-        textSize(20);
-        text(games_data_g[i].developer, diagramX, diagramY + 50);
-
         if (!zoomed_state_g) {
+            textAlign(CENTER);
+            textSize(22);
+            fill('black');
+            text(games_data_g[i].title, diagramX, diagramY - 10);
+
+            fill('black');
+            rect(diagramX, diagramY + 2, 30, 2);
+            fill(5, 48, 23, 200);
+            textSize(18);
+            text(games_data_g[i].developer, diagramX, diagramY + 30);
+
             subText(games_data_g[i].title, games_data_g[i].global_sale, games_data_g[i].user_score, games_data_g[i].user_count);
         }
     } else {
-        fill('blue');
+        fill(1, 73, 1, 255);
         pointSize = 4;
 
         noStroke();
         circle(pointX, pointY, pointSize);
-        subText();
     }
 }
 
@@ -170,7 +181,7 @@ function setupData(global_sales_minimum) {
         } else {
             let game_object = new Object();
             game_object.title = titles[i];
-            game_object.release_years = release_years[i];
+            game_object.release_year = release_years[i];
             game_object.platform = platforms[i];
             game_object.developer = developers[i];
             game_object.global_sale = global_sales[i];
@@ -182,7 +193,7 @@ function setupData(global_sales_minimum) {
     }
 
     games_data_g.sort(function (a, b) {
-        return a.release_years - b.release_years;
+        return a.release_year - b.release_year;
     });
 
     games_data_g = games_data_g.reverse();
